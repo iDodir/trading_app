@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -13,3 +14,9 @@ class Operation(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class OperationResponse(BaseModel):
+    status: str
+    data: List[Operation]
+    details: Optional[str]

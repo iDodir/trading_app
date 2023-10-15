@@ -1,12 +1,12 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
 from src.operations.models import operation
-from src.operations.schemas import Operation
+from src.operations.schemas import OperationResponse, Operation
 
 router = APIRouter(
     prefix="/operations",
@@ -14,11 +14,35 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[Operation])
+@router.get("/", response_model=OperationResponse)
 async def get_specific_operations(operation_type: str, session: AsyncSession = Depends(get_async_session)):
-    query = select(operation).where(operation.c.type == operation_type)
-    result = await session.execute(query)
-    return result.all()
+    try:
+        query = select(operation).where(operation.c.type == operation_type)
+        result = await session.execute(query)
+        # x = 1 / 0
+        return {
+            "status": "success",
+            "data": result.all(),
+            "details": None,
+        }
+    except ZeroDivisionError:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "data": None,
+                "details": "Делишь на ноль? Фатальная ошибка!",
+            }
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "status": "error",
+                "data": None,
+                "details": str(e),
+            }
+        )
 
 
 @router.post("/")
