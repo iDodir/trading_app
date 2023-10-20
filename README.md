@@ -15,3 +15,7 @@ celery -A src.tasks.tasks:celery worker --loglevel=INFO
 ```bash
 celery -A src.tasks.tasks:celery flower
 ```
+
+```bash
+pytest -v -s tests/
+```
